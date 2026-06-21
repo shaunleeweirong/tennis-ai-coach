@@ -14,7 +14,7 @@
 - **Package name:** `tennis_cv` (neutral internal name; product brand is unsettled per the spec).
 - **Project root for this subsystem:** `cv-pipeline/` under the repo root `/Users/shaunlee/Desktop/apps/tennis-app/`.
 - **Pose model:** MediaPipe legacy `mediapipe.solutions.pose` — 33 landmarks, normalized coords, no model-file download. Apache-2.0 (commercial-safe per the PRD validation log).
-- **LLM:** Anthropic SDK only, model `claude-opus-4-8`, via `client.messages.parse(...)` with a Pydantic `output_format` (schema-validated). The LLM key is read from the `ANTHROPIC_API_KEY` env var; never hardcode it.
+- **LLM:** any **OpenAI-compatible** chat endpoint via the `openai` SDK's `chat.completions.parse(...)` with a Pydantic `response_format` (schema-validated). Default model `gemini-2.5-flash-lite`, default base URL Gemini's OpenAI-compat endpoint; override via `COACHING_API_KEY`/`GEMINI_API_KEY`, `COACHING_BASE_URL`, and the `model` arg to swap to Qwen/DeepSeek/Claude/a gateway. Never hardcode the key. *(Updated 2026-06-21 from the original `claude-opus-4-8` choice — Opus was the most expensive tier for a task that only narrates pre-computed numbers; Flash-Lite is ~12× cheaper with no effect on analysis quality. Task 9's code blocks below show the original Anthropic implementation; the merged code uses the OpenAI-compatible client.)*
 - **Determinism:** all measurement and scoring (frames → metrics → 0–100 score) must be deterministic and network-free. Only `coaching.py` touches the network.
 - **MVP scope:** the **serve** is the only stroke analyzer built here. The classifier confirms a clip is a serve and rejects anything else (covers the PRD's "unusable / wrong stroke" error path). Forehand/backhand/volley analyzers are follow-on plans that reuse this pipeline.
 - **Image coordinate convention:** OpenCV/MediaPipe image space — `x` right, `y` **down**. "Higher in the frame" means **smaller `y`**. Every height comparison in this plan follows that convention.
@@ -1477,10 +1477,12 @@ git commit -m "feat(cv): wire end-to-end serve analysis pipeline and CLI"
 
 ## Manual smoke test (after Task 10)
 
-This validates the real MediaPipe + Claude path, which the unit tests stub out:
+This validates the real MediaPipe + LLM path, which the unit tests stub out.
+(Coaching now runs on an OpenAI-compatible endpoint, default model
+`gemini-2.5-flash-lite` — see the LLM constraint above.)
 
 1. `cd cv-pipeline && python -m pip install -e ".[dev]"`
-2. `export ANTHROPIC_API_KEY=...`
+2. `export GEMINI_API_KEY=...` (or set `COACHING_API_KEY` + `COACHING_BASE_URL` for another provider)
 3. Record (or download) a short side-on serve clip, save as `serve.mp4`.
 4. `python -m tennis_cv.cli serve.mp4 --out ./overlays`
 5. Confirm: JSON prints with a 0–100 score, three metrics, three overlay PNGs in `./overlays`, and a grounded coaching summary + drills. Open the PNGs and confirm the skeleton tracks the body and the contact frame is the wrist's highest point.

@@ -83,6 +83,19 @@ Four layers, exactly as the PRD describes:
 measurable, deterministic technique metrics and the 0–100 score; the LLM is the
 grounded "coach's voice" on top — it explains and recommends, never measures.
 
+**Coaching-model decision (2026-06-21):** because the LLM only narrates
+pre-computed numbers (it never sees the video and does no measurement), it needs
+no frontier model. The coaching call is implemented **provider-agnostically**
+over any OpenAI-compatible endpoint, default model **`gemini-2.5-flash-lite`**
+(~12× cheaper than the original Claude Opus choice, no effect on analysis
+quality), swappable to Qwen/DeepSeek/Claude or a gateway via env config. Two
+follow-ups before trusting coaching end-to-end, neither model-dependent:
+(a) replace free-form drill generation with selection from a **vetted drill
+library** so drill correctness is guaranteed by construction; (b) **calibrate the
+placeholder metric target ranges** — a wrong threshold mis-states the fault
+regardless of model. Validate with a small drill-accuracy eval against the PRD's
+≥90%-helpful bar.
+
 ## API surface (Phase 0 subset)
 
 From the PRD's internal API, the endpoints Phase 0 needs:

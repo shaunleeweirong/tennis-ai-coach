@@ -1,8 +1,17 @@
 from __future__ import annotations
 
+import os
+
 from pydantic import BaseModel
 
 from .types import MetricResult, StrokeScore, StrokeType
+
+# Coaching runs on any OpenAI-compatible chat endpoint, so the provider is a
+# config choice, not a code change. Default to Gemini 2.5 Flash-Lite (cheapest
+# tier with strong structured output); swap to Qwen / DeepSeek / Claude / a
+# gateway by overriding the model, base URL, and key via env vars.
+DEFAULT_COACHING_MODEL = "gemini-2.5-flash-lite"
+DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 
 class Issue(BaseModel):
@@ -51,17 +60,24 @@ def generate_coaching(
     score: StrokeScore,
     *,
     client=None,
-    model: str = "claude-opus-4-8",
+    model: str = DEFAULT_COACHING_MODEL,
 ) -> Coaching:
     if client is None:
-        import anthropic
+        import openai
 
-        client = anthropic.Anthropic()
+        client = openai.OpenAI(
+            base_url=os.environ.get("COACHING_BASE_URL", DEFAULT_BASE_URL),
+            api_key=(
+                os.environ.get("COACHING_API_KEY")
+                or os.environ.get("GEMINI_API_KEY")
+                or os.environ.get("OPENAI_API_KEY")
+            ),
+        )
     prompt = build_prompt(stroke_type, metrics, score)
-    response = client.messages.parse(
+    completion = client.chat.completions.parse(
         model=model,
         max_tokens=2000,
         messages=[{"role": "user", "content": prompt}],
-        output_format=Coaching,
+        response_format=Coaching,
     )
-    return response.parsed_output
+    return completion.choices[0].message.parsed

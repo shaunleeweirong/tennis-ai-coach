@@ -44,8 +44,12 @@ def _fake_coaching_client():
         issues=[Issue(title="Shallow bend", why="x", how="y", priority=1)],
         drills=[Drill(name="d", description="e", addresses="knee_flexion")],
     )
+    def fake_parse(**kw):
+        message = SimpleNamespace(parsed=coaching)
+        return SimpleNamespace(choices=[SimpleNamespace(message=message)])
+
     return SimpleNamespace(
-        messages=SimpleNamespace(parse=lambda **kw: SimpleNamespace(parsed_output=coaching))
+        chat=SimpleNamespace(completions=SimpleNamespace(parse=fake_parse))
     )
 
 

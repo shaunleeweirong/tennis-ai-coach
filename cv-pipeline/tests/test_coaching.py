@@ -33,12 +33,15 @@ def test_generate_coaching_uses_injected_client_and_returns_parsed():
 
     def fake_parse(**kwargs):
         captured.update(kwargs)
-        return SimpleNamespace(parsed_output=expected)
+        message = SimpleNamespace(parsed=expected)
+        return SimpleNamespace(choices=[SimpleNamespace(message=message)])
 
-    fake_client = SimpleNamespace(messages=SimpleNamespace(parse=fake_parse))
+    fake_client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(parse=fake_parse))
+    )
 
     result = generate_coaching(StrokeType.SERVE, factors, score, client=fake_client)
 
     assert result == expected
-    assert captured["model"] == "claude-opus-4-8"
-    assert captured["output_format"] is Coaching
+    assert captured["model"] == "gemini-2.5-flash-lite"
+    assert captured["response_format"] is Coaching
