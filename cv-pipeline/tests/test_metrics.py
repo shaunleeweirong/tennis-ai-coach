@@ -34,7 +34,7 @@ def test_computes_three_named_metrics_with_expected_values():
     # Loading frame: deep knee bend ~90 degrees (ankle directly below knee, hip forward)
     loading = _serve_frame(
         1,
-        knee_angle_pts=((0.65, 0.6), (0.5, 0.7), (0.5, 0.9)),
+        knee_angle_pts=((0.7, 0.7), (0.5, 0.7), (0.5, 0.9)),
         shoulder=(0.5, 0.4),
         elbow=(0.5, 0.5),
         wrist=(0.5, 0.6),
