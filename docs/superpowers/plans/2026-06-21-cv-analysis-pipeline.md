@@ -746,10 +746,10 @@ def test_computes_three_named_metrics_with_expected_values():
         wrist=(0.5, 0.1),
         hip=(0.5, 0.6),
     )
-    # Loading frame: deep knee bend ~90 degrees (ankle directly below knee, hip forward)
+    # Loading frame: deep knee bend ~90 degrees (hip level with knee, ankle below knee)
     loading = _serve_frame(
         1,
-        knee_angle_pts=((0.65, 0.6), (0.5, 0.7), (0.5, 0.9)),
+        knee_angle_pts=((0.7, 0.7), (0.5, 0.7), (0.5, 0.9)),
         shoulder=(0.5, 0.4),
         elbow=(0.5, 0.5),
         wrist=(0.5, 0.6),
@@ -780,7 +780,7 @@ from __future__ import annotations
 from .segmentation import dominant_wrist_index
 from .types import (
     L_WRIST, L_SHOULDER, L_ELBOW, L_HIP, L_KNEE, L_ANKLE,
-    R_SHOULDER, R_ELBOW, R_HIP, R_KNEE, R_ANKLE,
+    R_WRIST, R_SHOULDER, R_ELBOW, R_HIP, R_KNEE, R_ANKLE,
     MetricResult, PoseFrame, StrokeWindow, angle,
 )
 
