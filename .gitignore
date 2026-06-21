@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# macOS
+.DS_Store
+
+# CV pipeline outputs
+cv-pipeline/overlays/
+*.mp4
+
+# Env
+.env
