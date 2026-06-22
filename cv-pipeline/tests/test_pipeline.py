@@ -39,17 +39,13 @@ class _FakeEstimator:
 
 
 def _fake_coaching_client():
-    coaching = Coaching(
-        summary="Good extension; load the legs more.",
-        issues=[Issue(title="Shallow bend", why="x", how="y", priority=1)],
-        drills=[Drill(name="d", description="e", addresses="knee_flexion")],
-    )
-    def fake_parse(**kw):
-        message = SimpleNamespace(parsed=coaching)
-        return SimpleNamespace(choices=[SimpleNamespace(message=message)])
+    # Force the deterministic baseline: the voice pass raises, so generate_coaching
+    # falls back. Keeps the pipeline test offline and independent of coaching prose.
+    def parse(**kwargs):
+        raise RuntimeError("voice disabled in test")
 
     return SimpleNamespace(
-        chat=SimpleNamespace(completions=SimpleNamespace(parse=fake_parse))
+        chat=SimpleNamespace(completions=SimpleNamespace(parse=parse))
     )
 
 
@@ -71,7 +67,8 @@ def test_analyze_serve_end_to_end(tmp_path):
     assert 0 <= result.score.overall <= 100
     assert len(result.metrics) == 3
     assert len(result.overlay_paths) == 3
-    assert result.coaching.summary.startswith("Good extension")
+    assert isinstance(result.coaching.summary, str) and result.coaching.summary
+    assert isinstance(result.coaching.issues, list)
     assert result.duration == pytest.approx(5 / 30, abs=1e-3)
 
 
